@@ -71,15 +71,16 @@ def extract_broadcast_time(driver, row):
 def extract_tab_data(driver, tab_name, company_filter=None):
     """Extracts announcements from the specified tab, including attachments and broadcast time."""
     try:
-        wait = WebDriverWait(driver, 10)
+        wait = WebDriverWait(driver, 20) #Increased wait time
         
         # Click on the specified tab (Equity or SME)
         tab = wait.until(EC.element_to_be_clickable((By.XPATH, f"//a[contains(text(), '{tab_name}')]")))
         tab.click()
         print(f"✅ Switched to {tab_name} tab")
-        time.sleep(5)  # Wait for the table to load
+        time.sleep(10)  # Wait for the table to load
     except TimeoutException:
         print(f"⚠️ {tab_name} tab not found or already selected.")
+        return [] #return empty list if tab is not found
 
     # Extract table rows
     rows = driver.find_elements(By.XPATH, "//table/tbody/tr")
@@ -135,15 +136,15 @@ def download_attachment_with_selenium(driver, attachment_element, filename):
         time.sleep(1)  # Wait for the page to adjust
 
         # Wait until the element is clickable
-        wait = WebDriverWait(driver, 10)
+        wait = WebDriverWait(driver, 20) #increased wait time
         wait.until(EC.element_to_be_clickable(attachment_element))
 
         # Use JavaScript to click the element
         driver.execute_script("arguments[0].click();", attachment_element)
         print(f"📥 Downloading: {filename}")
 
-        # Wait for the file to download (adjust time to 100 seconds)
-        time.sleep(10)  # Increase the delay to allow for slower downloads
+        # Wait for the file to download (adjust time to 15 seconds)
+        time.sleep(15)  # Increased delay
     except Exception as e:
         print(f"❌ Failed to download {filename}: {e}")
 
@@ -161,7 +162,7 @@ def extract_data():
         # Open NSE website
         nse_url = "https://www.nseindia.com/companies-listing/corporate-filings-announcements"
         driver.get(nse_url)
-        time.sleep(5)  # Allow time for the page to load
+        time.sleep(10)  # Allow time for the page to load
 
         # Extract data for the specified tab
         extracted_data = extract_tab_data(driver, tab_name, company_filter)
@@ -195,4 +196,4 @@ def extract_data():
 if __name__ == "__main__":
     # Use the PORT environment variable if available (for Render)
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.

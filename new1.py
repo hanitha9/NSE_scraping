@@ -1,7 +1,7 @@
-from flask import Flask, jsonify, request, render_template
 import os
 import time
 import csv
+from flask import Flask, jsonify, request, render_template
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -18,7 +18,7 @@ load_dotenv()
 app = Flask(__name__)
 
 # Define paths for data and attachments
-download_folder = "C:/Users/HANITHA/Downloads/NSE_Announcements"
+download_folder = os.path.join(os.path.dirname(__file__), "data")
 attachments_folder = os.path.join(download_folder, "attachments")
 
 # Ensure directories exist
@@ -153,12 +153,16 @@ def download_attachment_with_selenium(driver, attachment_element, filename):
 # Load scraped data from CSV
 def load_scraped_data(tab_name):
     """Loads scraped data from the CSV file."""
-    csv_file = os.path.join(download_folder, f"{tab_name.lower()}_announcements.csv")
+    csv_file = os.path.join(os.path.dirname(__file__), "data", f"{tab_name.lower()}_announcements.csv")
     data = []
-    with open(csv_file, "r", encoding="utf-8") as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            data.append(row)
+    try:
+        with open(csv_file, "r", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                data.append(row)
+    except FileNotFoundError as e:
+        print(f"❌ File not found: {csv_file}")
+        raise e
     return data
 
 # AI Querying (Part 2)
@@ -177,7 +181,7 @@ def query_data():
         data = load_scraped_data(tab_name)
 
         # Use OpenAI's GPT to interpret the query and retrieve relevant data
-        client = OpenAI(api_key=os.getenv("API_KEY"))  # Load API key from environment
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))  # Load API key from environment
         response = client.chat.completions.create(
             model="gpt-4",  # Use GPT-4 or any other suitable model
             messages=[

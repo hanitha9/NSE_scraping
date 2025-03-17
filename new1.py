@@ -1,23 +1,14 @@
+from flask import Flask, jsonify, request, render_template  # Add render_template
 import os
 import time
 import csv
-from flask import Flask, jsonify, request
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from openai import OpenAI  # For AI Querying (Part 2)
-from dotenv import load_dotenv
-import os
-
-load_dotenv()  # Load environment variables
-API_KEY = os.getenv("API_KEY")
-
-if not API_KEY:
-    raise ValueError("⚠️ API Key is missing! Make sure to set it in the .env file.")
-
+from openai import OpenAI
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -182,7 +173,7 @@ def query_data():
         data = load_scraped_data(tab_name)
 
         # Use OpenAI's GPT to interpret the query and retrieve relevant data
-        client = OpenAI(api_key=API_KEY))  # Load API key from environment
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))  # Load API key from environment
         response = client.chat.completions.create(
             model="gpt-4",  # Use GPT-4 or any other suitable model
             messages=[
@@ -248,6 +239,11 @@ def extract_data():
             "status": "error",
             "message": str(e)
         }), 500
+
+# Serve the frontend interface
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 # Run the Flask app
 if __name__ == "__main__":

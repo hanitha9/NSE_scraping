@@ -181,9 +181,9 @@ def query_data():
         data = load_scraped_data(tab_name)
 
         # Use OpenAI's GPT to interpret the query and retrieve relevant data
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))  # Load API key from environment
+        client = OpenAI(api_key=os.getenv("API_KEY"))  # Load API key from environment
         response = client.chat.completions.create(
-            model="gpt-4",  # Use GPT-4 or any other suitable model
+            model="gpt-4o",  # Use GPT-4 or any other suitable model
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that retrieves relevant announcements based on user queries."},
                 {"role": "user", "content": f"Query: {query}\n\nData: {data}"}

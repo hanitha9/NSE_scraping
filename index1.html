@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSE Announcements</title>
+</head>
+<body>
+    <h1>NSE Announcements</h1>
+    <form id="queryForm">
+        <label for="query">Enter your query:</label>
+        <input type="text" id="query" name="query" required>
+        <button type="submit">Submit</button>
+    </form>
+    <pre id="result"></pre>
+
+    <script>
+        document.getElementById("queryForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const query = document.getElementById("query").value;
+            const response = await fetch("/query", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query })
+            });
+            const data = await response.json();
+            document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+        });
+    </script>
+</body>
+</html>

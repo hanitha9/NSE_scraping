@@ -1,6 +1,8 @@
 import os
 import time
 import csv
+import logging
+from typing import List, Optional
 from flask import Flask, jsonify, request, render_template
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
@@ -14,6 +16,9 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
 # Initialize Flask app
 app = Flask(__name__)
 
@@ -26,7 +31,7 @@ os.makedirs(download_folder, exist_ok=True)
 os.makedirs(attachments_folder, exist_ok=True)
 
 # Set up Chrome options
-def setup_chrome_options():
+def setup_chrome_options() -> uc.ChromeOptions:
     options = uc.ChromeOptions()
     prefs = {
         "download.default_directory": attachments_folder,
@@ -41,13 +46,13 @@ def setup_chrome_options():
     return options
 
 # Initialize Chrome driver
-def init_driver():
+def init_driver() -> uc.Chrome:
     options = setup_chrome_options()
     driver = uc.Chrome(options=options)
     return driver
 
 # Extract broadcast time and tooltip data
-def extract_broadcast_time(driver, row):
+def extract_broadcast_time(driver: uc.Chrome, row) -> str:
     """Extracts broadcast time and tooltip data from a table row."""
     try:
         # Locate the broadcast time element
@@ -67,11 +72,11 @@ def extract_broadcast_time(driver, row):
         full_broadcast_time = f"{broadcast_time}\n{tooltip_data}"
         return full_broadcast_time
     except Exception as e:
-        print(f"❌ Failed to extract broadcast time: {e}")
+        logging.error(f"Failed to extract broadcast time: {e}")
         return "N/A"
 
 # Extract data from a specific tab
-def extract_tab_data(driver, tab_name, company_filter=None):
+def extract_tab_data(driver: uc.Chrome, tab_name: str, company_filter: Optional[str] = None) -> List[List[str]]:
     """Extracts announcements from the specified tab, including attachments and broadcast time."""
     try:
         wait = WebDriverWait(driver, 10)
@@ -79,10 +84,10 @@ def extract_tab_data(driver, tab_name, company_filter=None):
         # Click on the specified tab (Equity or SME)
         tab = wait.until(EC.element_to_be_clickable((By.XPATH, f"//a[contains(text(), '{tab_name}')]")))
         tab.click()
-        print(f"✅ Switched to {tab_name} tab")
+        logging.info(f"Switched to {tab_name} tab")
         time.sleep(5)  # Wait for the table to load
     except TimeoutException:
-        print(f"⚠️ {tab_name} tab not found or already selected.")
+        logging.warning(f"{tab_name} tab not found or already selected.")
 
     # Extract table rows
     rows = driver.find_elements(By.XPATH, "//table/tbody/tr")
@@ -130,7 +135,7 @@ def extract_tab_data(driver, tab_name, company_filter=None):
     return extracted_data
 
 # Download attachment using Selenium
-def download_attachment_with_selenium(driver, attachment_element, filename):
+def download_attachment_with_selenium(driver: uc.Chrome, attachment_element, filename: str) -> None:
     """Downloads the attachment file using Selenium."""
     try:
         # Scroll the element into view
@@ -143,17 +148,17 @@ def download_attachment_with_selenium(driver, attachment_element, filename):
 
         # Use JavaScript to click the element
         driver.execute_script("arguments[0].click();", attachment_element)
-        print(f"📥 Downloading: {filename}")
+        logging.info(f"Downloading: {filename}")
 
         # Wait for the file to download (adjust time to 100 seconds)
         time.sleep(10)  # Increase the delay to allow for slower downloads
     except Exception as e:
-        print(f"❌ Failed to download {filename}: {e}")
+        logging.error(f"Failed to download {filename}: {e}")
 
 # Load scraped data from CSV
-def load_scraped_data(tab_name):
+def load_scraped_data() -> List[dict]:
     """Loads scraped data from the CSV file."""
-    csv_file = os.path.join(os.path.dirname(__file__), "data", f"{tab_name.lower()}_announcements.csv")
+    csv_file = os.path.join(download_folder, "equity_announcements.csv")  # Hardcoded file name
     data = []
     try:
         with open(csv_file, "r", encoding="utf-8") as file:
@@ -161,7 +166,7 @@ def load_scraped_data(tab_name):
             for row in reader:
                 data.append(row)
     except FileNotFoundError as e:
-        print(f"❌ File not found: {csv_file}")
+        logging.error(f"File not found: {csv_file}")
         raise e
     return data
 
@@ -174,18 +179,19 @@ def query_data():
         if not query:
             return jsonify({"status": "error", "message": "Query is required."}), 400
 
-        # Get the tab name (default to Equity)
-        tab_name = request.json.get("tab", "Equity")
-
         # Load the scraped data from CSV
-        data = load_scraped_data(tab_name)
+        data = load_scraped_data()
 
         # Use OpenAI's GPT to interpret the query and retrieve relevant data
-        client = OpenAI(api_key=os.getenv("API_KEY"))  # Load API key from environment
+        client = OpenAI(api_key=os.getenv("API_KEY"))
+        system_prompt = """
+        You are a helpful assistant that retrieves relevant announcements based on user queries.
+        The dataset contains the following fields: Symbol, Company Name, Subject, Details, Broadcast Date and Time, and Attachment File.
+        """
         response = client.chat.completions.create(
-            model="gpt-4o",  # Use GPT-4 or any other suitable model
+            model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant that retrieves relevant announcements based on user queries."},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"Query: {query}\n\nData: {data}"}
             ]
         )
@@ -199,6 +205,7 @@ def query_data():
             "result": result
         })
     except Exception as e:
+        logging.error(f"Error in query_data: {e}")
         return jsonify({
             "status": "error",
             "message": str(e)
@@ -227,13 +234,13 @@ def extract_data():
         driver.quit()
 
         # Save extracted data to CSV
-        csv_file = os.path.join(download_folder, f"{tab_name.lower()}_announcements.csv")
+        csv_file = os.path.join(download_folder, "equity_announcements.csv")  # Save to equity_announcements.csv
         with open(csv_file, "w", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
             writer.writerow(["Symbol", "Company Name", "Subject", "Details", "Broadcast Date and Time", "Attachment File"])
             writer.writerows(extracted_data)
 
-        print(f"✅ Data successfully saved to {csv_file}")
+        logging.info(f"Data successfully saved to {csv_file}")
 
         # Return the extracted data as JSON
         return jsonify({
@@ -243,6 +250,7 @@ def extract_data():
             "csv_file": csv_file
         })
     except Exception as e:
+        logging.error(f"Error in extract_data: {e}")
         return jsonify({
             "status": "error",
             "message": str(e)

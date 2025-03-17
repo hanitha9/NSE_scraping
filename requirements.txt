@@ -7,4 +7,5 @@ undetected-chromedriver==3.5.5
 requests==2.32.3
 python-dotenv==1.0.0
 gunicorn==21.2.0
-anthropic==0.21.4  # ✅ Added Anthropic API SDK
+anthropic==0.49.0
+# ✅ Added Anthropic API SDK

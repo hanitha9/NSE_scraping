@@ -247,7 +247,7 @@ def extract_data():
 # Serve the frontend interface
 @app.route("/")
 def index():
-    return "Welcome to the NSE Scraping API!"
+    return render_template("index1.html")
 
 # Run the Flask app
 if __name__ == "__main__":

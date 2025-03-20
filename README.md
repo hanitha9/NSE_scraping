@@ -46,12 +46,12 @@ Navigate to the link to use the service
 4. Navigating to the link opens the interface where users can enter queries.
 
 # Technologies Used
-
+```
 Python (Flask, selenium,Pandas, Requests)
 HTML, CSS, JavaScript (Frontend)
 OpenAI API (For query handling)
 Render (Deployment)
-
+```
 # Future Enhancements
 Add authentication for API usage.
 Improve data visualization.

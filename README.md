@@ -5,12 +5,14 @@ This project is a web service that scrapes NSE (National Stock Exchange) data an
 ## Project Structure
 
 NSE_scrapping/
+```
 │── new1.py # Main Flask application
 │── templates/ │ └── index1.html # Frontend interface
 │── data/ │ └── equityannouncements.csv # Stored scraped data
 │── requirements.txt # Dependencies
 │── Procfile # Deployment instructions
 │── .env # API keys and environment variables
+```
 
 ## Features
 

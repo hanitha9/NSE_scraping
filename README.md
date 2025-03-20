@@ -1,61 +1,67 @@
-# NSE Web Scraping with LLaMA LLM
+# NSE Web Scraping and AI Query Handling
 
-## 📌 Project Overview
-This project focuses on **scraping real-time stock market data from the National Stock Exchange (NSE)** and leveraging **LLaMA LLM** for data analysis, summarization, and pattern recognition. It provides insights into stock trends, sentiment analysis, and intelligent query handling.
+This project is a web-based application that scrapes equity announcements from the NSE website, stores the data in a CSV file, and allows users to interact with it using OpenAI's GPT model. The project is built using Flask for the backend and deployed on Render.
 
-## 🚀 Features
-- **Web Scraping**: Extracts live stock data, including top gainers, losers, and historical trends.
-- **Data Cleaning & Structuring**: Uses LLaMA to organize and preprocess extracted data.
-- **Sentiment Analysis**: Analyzes stock-related financial news and reports.
-- **Automated Summarization**: Generates concise summaries of stock trends.
-- **Intelligent Query Handling**: Processes natural language queries to fetch relevant stock data.
-- **Pattern Recognition**: Identifies historical stock trends for decision support.
+## Features
+- **Web Scraping**: Extracts equity announcements from the NSE website.
+- **Data Storage**: Stores scraped data in `equityannouncements.csv`.
+- **AI-Powered Query Handling**: Uses OpenAI's GPT model to respond to user queries about the data.
+- **Web Interface**: Provides a simple frontend (`index1.html`) for user interaction.
+- **Deployment**: Hosted on Render for live access.
 
-## 🛠️ Tech Stack
-- **Python** (BeautifulSoup, Requests, Pandas, Matplotlib)
-- **LLaMA LLM** (For NLP tasks)
-- **Flask/FastAPI** (For API-based query handling)
-- **Jupyter Notebook** (For data analysis & visualization)
+## Project Structure
+```
+NSE_scrapping/
+│── new1.py             # Main Flask application
+│── index1.html         # Frontend interface
+│── requirements.txt    # Dependencies
+│── Procfile            # Deployment instructions
+│── .env                # API keys and environment variables
+│── equityannouncements.csv  # Stored scraped data
+```
 
-## 📂 Installation & Setup
-1. **Clone the repository:**
-   ```sh
-   git clone https://github.com/hanitha/NSE_scraping.git
-   cd NSE_scraping
+## Setup and Installation
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/your-username/NSE_scrapping.git
+   cd NSE_scrapping
    ```
-2. **Install dependencies:**
-   ```sh
+
+2. **Create a Virtual Environment** (Optional but recommended)
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install Dependencies**
+   ```bash
    pip install -r requirements.txt
    ```
-3. **Run the web scraper:**
-   ```sh
-   python scraper.py
-   ```
-4. **Start the API for query handling (if applicable):**
-   ```sh
+
+4. **Set Up Environment Variables**
+   - Create a `.env` file and add your OpenAI API key:
+     ```
+     OPENAI_API_KEY=your_openai_api_key_here
+     ```
+
+5. **Run the Application Locally**
+   ```bash
    python new1.py
    ```
+   Open `http://127.0.0.1:5000` in your browser.
 
-## 📊 Usage
-- Run the script to **scrape** and **store** real-time stock data.
-- Use LLaMA-powered **query handling** to retrieve specific stock insights.
-- Perform **trend analysis and sentiment classification** using LLaMA’s NLP capabilities.
+## Deployment on Render
+1. Extract the repo to Render.
+2. Render builds and deploys automatically.
+3. Once deployed, copy the generated link and navigate to open the web interface.
 
-## 📝 Future Enhancements
-- Implement **real-time dashboard** for stock visualization.
-- Integrate **deep learning** for enhanced pattern recognition.
-- Expand **multi-source data scraping** (e.g., social media for sentiment analysis).
+## Usage
+- Open the web interface.
+- Enter queries about NSE equity announcements.
+- Receive AI-generated responses powered by OpenAI's GPT model.
 
-## 🤝 Contributing
-Feel free to **fork this repository** and submit a pull request for improvements!
+## Contributing
+Feel free to fork and improve the project! Pull requests are welcome.
 
-## 📜 License
-This project is licensed under the **MIT License**.
-
----
-### 🔗 Connect with Me
-📧 Email:hanitharajeswari9@gmail.com
-
----
-
-⭐ If you found this project useful, don't forget to **star** this repository!
+## License
+This project is licensed under the MIT License.
